@@ -1,5 +1,5 @@
 import unittest
-from request.request import Request
+from model.request import Request
 from ws_exceptions.ws_exceptions import BadRequest
 
 
