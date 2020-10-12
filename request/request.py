@@ -16,15 +16,20 @@ class Request:
             if line.startswith(('GET', 'POST', 'PUT', 'DELETE')) and\
                     is_first_line:
                 first_line = line.split(' ')
+                if len(first_line) != 3:
+                    raise BadRequest('Bad starts line in request')
                 self.method = first_line[0]
                 self.uri = first_line[1]
                 self.version = first_line[2]
-                is_first_line = False
             elif is_first_line:
-                break
+                raise BadRequest('Bad starts line in request')
             else:
                 kv = line.split(': ', maxsplit=1)
+                if len(kv) != 2:
+                    continue
                 self.headers[kv[0]] = kv[1]
+
+            is_first_line = False
 
     def _check_request(self) -> None:
         if self.method not in ('GET', 'POST', 'PUT', 'DELETE'):
