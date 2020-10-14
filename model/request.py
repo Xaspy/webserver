@@ -2,7 +2,7 @@ from ws_exceptions.ws_exceptions import BadRequest
 
 
 class Request:
-    def __init__(self, client_request: bytes):
+    def __init__(self, client_request: bytes) -> None:
         self.method = ''
         self.uri = ''
         self.version = ''
