@@ -27,6 +27,12 @@ class TestMakeResponse(unittest.TestCase):
         response = response_b.status
         self.assertEqual(response, 404)
 
+    def test_bad_request(self):
+        http = urllib3.PoolManager()
+        response_b = http.request('GUT', f'http://localhost:{self.port}/')
+        response = response_b.status
+        self.assertEqual(response, 400)
+
     def test_correct_response(self):
         http = urllib3.PoolManager()
         response_b = http.request('GET', f'http://localhost:'

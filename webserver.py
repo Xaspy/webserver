@@ -5,7 +5,7 @@ from ws_exceptions.ws_exceptions import BadRequest
 
 
 class Xio:
-    def __init__(self, name, host='localhost', port=80) -> None:
+    def __init__(self, name) -> None:
         self.name = name
         self.routes = Routes()
 
