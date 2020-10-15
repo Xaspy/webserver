@@ -26,7 +26,9 @@ class Xio:
                             if request.is_empty_request:
                                 recv = b''
                             else:
-                                recv = self.routes.execute_route(request.uri, request.method)
+                                recv = self.routes\
+                                    .execute_route(request.uri,
+                                                   request.method)
                         except BadRequest as e:
                             recv = self.routes.get_bad_request_page()
                         if is_debug:
@@ -34,7 +36,8 @@ class Xio:
                             print(f'Response is {recv}')
                             print(f'Except: {e}\n')
                         else:
-                            print(f'Receive to {addr} response starts with: "{recv[:24]}..."\n')
+                            print(f'Receive to {addr} response starts with:'
+                                  f' "{recv[:24]}..."\n')
                         conn.sendall(recv)
                         break
 

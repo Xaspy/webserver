@@ -29,19 +29,22 @@ class TestMakeResponse(unittest.TestCase):
 
     def test_correct_response(self):
         http = urllib3.PoolManager()
-        response_b = http.request('GET', f'http://localhost:{self.port}/test-page-get')
+        response_b = http.request('GET', f'http://localhost:'
+                                         f'{self.port}/test-page-get')
         response = response_b.data.decode('utf-8')
         self.assertEqual(response, 'get ok')
 
     def test_get_correct_response(self):
         http = urllib3.PoolManager()
-        response_b = http.request('POST', f'http://localhost:{self.port}/test-page-post')
+        response_b = http.request('POST', f'http://localhost:'
+                                          f'{self.port}/test-page-post')
         response = response_b.data.decode('utf-8')
         self.assertEqual(response, 'post ok')
 
     def test_post_correct_response(self):
         http = urllib3.PoolManager()
-        response_b = http.request('GET', f'http://localhost:{self.port}/test-page')
+        response_b = http.request('GET', f'http://localhost:'
+                                         f'{self.port}/test-page')
         response = response_b.data.decode('utf-8')
         self.assertEqual(response, 'all-right')
 

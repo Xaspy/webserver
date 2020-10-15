@@ -18,7 +18,8 @@ class Routes:
     def add_route(self, path_r: str, route: Route) -> None:
         self.routes[path_r] = route
 
-    def execute_route(self, path_r: str, method: str, *args, **kwargs) -> bytes:
+    def execute_route(self, path_r: str, method: str, *args, **kwargs)\
+            -> bytes:
         if path_r in self.routes.keys():
             if method in self.routes[path_r].funcs:
                 data = str(self.routes[path_r].funcs[method](*args, **kwargs))
