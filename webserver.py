@@ -5,17 +5,15 @@ from ws_exceptions.ws_exceptions import BadRequest
 
 
 class Xio:
-    def __init__(self, name, host='localhost') -> None:
+    def __init__(self, name, host='localhost', port=80) -> None:
         self.name = name
-        self.host = host
-        self.port = 80
         self.routes = Routes()
 
-    def run(self, is_debug=False) -> None:
+    def run(self, port=80, host='localhost', is_debug=False) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((self.host, self.port))
+            s.bind((host, port))
             s.listen()
-            print(f'Xio server started! Link: http://{self.host}')
+            print(f'Xio server started! Link: http://{host}')
             while True:
                 conn, addr = s.accept()
                 with conn:

@@ -21,7 +21,9 @@ class Routes:
     def execute_route(self, path_r: str, method: str, *args, **kwargs) -> bytes:
         if path_r in self.routes.keys():
             if method in self.routes[path_r].funcs:
-                result = str(self.routes[path_r].funcs[method](*args, **kwargs))
+                data = str(self.routes[path_r].funcs[method](*args, **kwargs))
+                result = f'HTTP/1.1 200 OK\r\n\r\n' \
+                         f'{data}'
                 return bytes(result, encoding='ascii')
 
         page = self._get_error_page(404)
