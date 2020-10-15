@@ -1,6 +1,8 @@
 import socket
+from model.routes import Route, Routes
 from model.request import Request
 from model.response import Response
+from ws_exceptions.ws_exceptions import BadRequest
 
 
 class Xio:
@@ -8,6 +10,7 @@ class Xio:
         self.name = name
         self.host = host
         self.port = 80
+        self.routes = Routes()
 
     def run(self, is_debug=False) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -24,11 +27,16 @@ class Xio:
                             print(data.decode('utf-8'))
                         request = Request(data)
                         response = Response(request)
-                        recv = response.get_response()
+                        recv = self.routes.execute_route(response.route)
                         if is_debug:
                             print(recv)
                         conn.sendall(recv)
                         break
+
+    def route(self, func, path: str,
+              methods=('GET', 'POST', 'DELETE', 'PUT')) -> None:
+        route = Route(func, methods)
+        self.routes.add_route(path, route)
 
 
 if __name__ == '__main__':

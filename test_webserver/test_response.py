@@ -28,9 +28,9 @@ class TestMakeResponse(unittest.TestCase):
     def test_correct_response(self):
         request = Request(self.bytes_correct_request)
         response = Response(request)
-        expected_result = b'''TEST_VER 200 OK\r\n\r\n'''
+        expected_result = b'''HTTP/1.1 200 OK\r\n\r\n'''
         result = response.get_response()
-        self.assertEqual(result, expected_result)
+        self.assertTrue(result.startswith(expected_result))
 
 
 if __name__ == '__main__':
