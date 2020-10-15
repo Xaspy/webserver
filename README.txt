@@ -12,21 +12,20 @@ For using web-framework you should:
 	from webserver import Xio
 
 
-Further create object of webserver with his name by first argument and his
-address by optional second argument (default = 'localhost'):
+Further create object of webserver with his name by first argument:
 
-	app = Xio(__name__, host='127.0.0.1')
+	app = Xio(__name__)
 
 
 Create routes to your project, firstly choose path to thing, secondly choose
-methods available for this (default = ('GET', 'POST', 'DELETE', 'PUT')):
+methods available for this (default: methods= ('GET', 'POST', 'DELETE', 'PUT')):
 
 	@app.route('/some-path', ['GET'])
 	def some_throw():
     		return 'Hello, my friend!'
 
-Nextly runs server! You can choose one optional argument `is_debug` which provides you some info while server works (
-default = False):
+Nextly runs server! You can choose one optional argument `is_debug`, `host`, `port`  which provides you some info while
+server works (default: is_debug= False, host='localhost', port=80):
 
 	app.run(is_debug=True)
 
