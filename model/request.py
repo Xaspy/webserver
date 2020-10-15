@@ -8,8 +8,11 @@ class Request:
         self.version = ''
         self.headers = dict()
         if client_request != b'':
+            self.is_empty_request = False
             self._parse_request(client_request.decode('utf-8'))
             self._check_request()
+        else:
+            self.is_empty_request = True
 
     def _parse_request(self, str_request: str) -> None:
         is_first_line = True
