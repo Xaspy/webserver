@@ -1,6 +1,9 @@
 import socket
-from model.routes import Route, Routes
+import asyncio
+import logging
 from model.request import Request
+from model.routes import Route, Routes
+from ws_logging.ws_logging import Logger
 from ws_exceptions.ws_exceptions import BadRequest
 
 
@@ -8,38 +11,38 @@ class Xio:
     def __init__(self, name) -> None:
         self.name = name
         self.routes = Routes()
+        self.loop = asyncio.get_event_loop()
 
     def run(self, port=80, host='localhost', is_debug=False) -> None:
+        self.logger = Logger(is_debug)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((host, port))
-            s.listen()
-            print(f'Xio server started! Link: http://{host}')
+            s.listen(10)
+            s.setblocking(False)
+            self.logger.server_starts(host)
+            self.loop.run_until_complete(self._run_async(s))
+
+    async def _run_async(self, sock):
+        while True:
+            client, addr = await self.loop.sock_accept(sock)
+            self.loop.create_task(self._handle_client(client, addr))
+
+    async def _handle_client(self, client, addr):
+        with client:
+            self.logger.client_connect(addr)
             while True:
-                conn, addr = s.accept()
-                with conn:
-                    print(f'Connected by {addr}\n')
-                    while True:
-                        data = conn.recv(2 ** 20)
-                        e = 'nothing'
-                        try:
-                            request = Request(data)
-                            if request.is_empty_request:
-                                recv = b''
-                            else:
-                                recv = self.routes\
-                                    .execute_route(request.uri,
-                                                   request.method)
-                        except BadRequest as e:
-                            recv = self.routes.get_bad_request_page()
-                        if is_debug:
-                            print(f'Request is {data}')
-                            print(f'Response is {recv}')
-                            print(f'Except: {e}\n')
-                        else:
-                            print(f'Receive to {addr} response starts with:'
-                                  f' "{recv[:24]}..."\n')
-                        conn.sendall(recv)
-                        break
+                data = await self.loop.sock_recv(client, 2**20)
+                try:
+                    request = Request(data)
+                    recv = self.routes.execute_route(request.uri,
+                                                     request.method)
+                except BadRequest:
+                    recv = self.routes.get_bad_request_page()
+                self.logger.client_request(addr, request.method,
+                                           request.uri, request.data)
+                self.logger.server_response(addr, recv)
+                await self.loop.sock_sendall(client, recv)
+                break
 
     def route(self, path: str, methods=('GET', 'POST', 'DELETE', 'PUT')):
         def decorator(func):

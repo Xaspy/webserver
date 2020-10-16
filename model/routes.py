@@ -20,6 +20,8 @@ class Routes:
 
     def execute_route(self, path_r: str, method: str, *args, **kwargs)\
             -> bytes:
+        if method == '':
+            return b''
         if path_r in self.routes.keys():
             if method in self.routes[path_r].funcs:
                 data = str(self.routes[path_r].funcs[method](*args, **kwargs))
