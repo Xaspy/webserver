@@ -1,4 +1,6 @@
 import time
+import requests
+from urllib import request, parse
 import urllib3
 import unittest
 from webserver import Xio
@@ -41,11 +43,12 @@ class TestMakeResponse(unittest.TestCase):
         self.assertEqual(response, 'get ok')
 
     def test_get_correct_response(self):
-        http = urllib3.PoolManager()
-        response_b = http.request('POST', f'http://localhost:'
-                                          f'{self.port}/test-page-post')
-        response = response_b.data.decode('utf-8')
-        self.assertEqual(response, 'post ok')
+        data = parse.urlencode({'val': 'lol'}).encode()
+        req = request.Request(f'http://localhost:'
+                              f'{self.port}/test-page-post', data=data)
+        resp = request.urlopen(req)
+        response = resp.read().decode('utf-8')
+        self.assertEqual(response, 'post ok val=lol')
 
     def test_post_correct_response(self):
         http = urllib3.PoolManager()

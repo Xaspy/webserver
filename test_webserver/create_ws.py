@@ -13,9 +13,9 @@ def test_page():
     return 'get ok'
 
 
-@app.route('/test-page-post')
-def test_page():
-    return 'post ok'
+@app.route('/test-page-post', ['POST'])
+def test_page(data):
+    return 'post ok ' + data
 
 
 def start_server(port):
