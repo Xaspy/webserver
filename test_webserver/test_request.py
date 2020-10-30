@@ -44,9 +44,6 @@ class TestParseRequest(unittest.TestCase):
         self.assertEqual(request.headers['User-Agent'], 'Xaspy')
         self.assertFalse('Connection' in request.headers.keys())
 
-    def test_damaged_start_raise_exc(self):
-        self.assertRaises(BadRequest, Request, self.bytes_ds_request)
-
     def test_correct_data_body(self):
         request = Request(self.bytes_correct_request)
         self.assertEqual(request.data, 'Hi, my ancient friend!')

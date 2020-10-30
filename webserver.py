@@ -3,9 +3,9 @@ import socket
 import asyncio
 from async_timeout import timeout
 from model.request import Request
+from model.response import Response
 from model.routes import Route, Routes
 from ws_logging.ws_logging import Logger
-from model.header_handler import HeaderHandler
 from ws_exceptions.ws_exceptions import BadRequest
 
 
@@ -78,31 +78,21 @@ class Xio:
         :param data: request data
         :return: is close connection by client
         """
-        try:
-            request = Request(data)
-            hh = HeaderHandler(request.headers)
-            if request.method == 'POST':
-                recv = self.routes.execute_route(request.uri,
-                                                 request.method,
-                                                 hh,
-                                                 request.data)
-            else:
-                recv = self.routes.execute_route(request.uri,
-                                                 request.method,
-                                                 hh)
-            self.logger.client_request(addr, request.method,
-                                       request.uri, data)
-        except BadRequest:
-            hh = HeaderHandler({})
-            recv = self.routes.get_bad_request_page(hh)
-            self.logger.client_request(addr, 'BAD', 'BAD', 'BAD')
-            await self.loop.sock_sendall(client, recv)
-            return True
-        self.logger.server_response(addr, recv)
-        await self.loop.sock_sendall(client, recv)
-        return hh.is_close_connection()
+        request = Request(data)
+        response = Response(request, self.routes)
+        sending_data = response.bytes_response()
+
+        await self.loop.sock_sendall(client, sending_data)
+        self.logger.server_response(addr, sending_data)
+
+        return response.is_close_connection()
 
     def route(self, path: str, methods=('GET',)):
+        """
+        Create route to sending respond what you wanna
+        :param path: path to your data
+        :param methods: methods which supports on this route
+        """
         def decorator(func):
             route = Route(func, methods)
             self.routes.add_route(path, route)

@@ -19,33 +19,45 @@ class TestMakeResponse(unittest.TestCase):
             cls.port = 5000 + i
             cls.p = Process(target=start_server, args=(cls.port,))
             cls.p.start()
-            time.sleep(0.5)
+            time.sleep(0.1)
             if cls.p.is_alive():
                 break
 
     def test_not_found_page(self):
         http = urllib3.PoolManager()
-        response_b = http.request('GET', f'http://localhost:{self.port}/')
+        response_b = http.request('GET', f'http://localhost:{self.port}/',
+                                  headers={'Connection': 'close'})
         response = response_b.status
         self.assertEqual(response, 404)
 
-    def test_bad_request(self):
+    def test_not_bad_request(self):
         http = urllib3.PoolManager()
-        response_b = http.request('GUT', f'http://localhost:{self.port}/')
+        response_b = http.request('', f'http://localhost:{self.port}/',
+                                  headers={'Connection': 'close'})
         response = response_b.status
         self.assertEqual(response, 400)
+
+    def test_method_not_allowed(self):
+        http = urllib3.PoolManager()
+        response_b = http.request('GUT', f'http://localhost:'
+                                         f'{self.port}/test-page-get',
+                                  headers={'Connection': 'close'})
+        response = response_b.status
+        self.assertEqual(response, 405)
 
     def test_correct_response(self):
         http = urllib3.PoolManager()
         response_b = http.request('GET', f'http://localhost:'
-                                         f'{self.port}/test-page-get')
+                                         f'{self.port}/test-page-get',
+                                  headers={'Connection': 'close'})
         response = response_b.data.decode('utf-8')
         self.assertEqual(response, 'get ok')
 
     def test_get_correct_response(self):
         data = parse.urlencode({'val': 'lol'}).encode()
         req = request.Request(f'http://localhost:'
-                              f'{self.port}/test-page-post', data=data)
+                              f'{self.port}/test-page-post', data=data,
+                              headers={'Connection': 'close'})
         resp = request.urlopen(req)
         response = resp.read().decode('utf-8')
         self.assertEqual(response, 'post ok val=lol')
@@ -53,7 +65,8 @@ class TestMakeResponse(unittest.TestCase):
     def test_post_correct_response(self):
         http = urllib3.PoolManager()
         response_b = http.request('GET', f'http://localhost:'
-                                         f'{self.port}/test-page')
+                                         f'{self.port}/test-page',
+                                  headers={'Connection': 'close'})
         response = response_b.data.decode('utf-8')
         self.assertEqual(response, 'all-right')
 

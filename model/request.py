@@ -8,12 +8,7 @@ class Request:
         self.version = ''
         self.headers = dict()
         self.data = ''
-        if client_request != b'':
-            self.is_empty_request = False
-            self._parse_request(client_request.decode('utf-8'))
-            self._check_request()
-        else:
-            self.is_empty_request = True
+        self._parse_request(client_request.decode('utf-8'))
 
     def _parse_request(self, str_request: str) -> None:
         is_first_line = True
@@ -23,12 +18,8 @@ class Request:
                 is_data_body = True
                 continue
             if is_first_line:
-                first_line = line.split(' ')
-                if len(first_line) != 3:
-                    raise BadRequest('Very short starts line in model')
-                self.method = first_line[0]
-                self.uri = first_line[1]
-                self.version = first_line[2]
+                if not self._is_correct_first_line(line):
+                    return
             elif not is_data_body:
                 kv = line.split(': ', maxsplit=1)
                 if len(kv) != 2:
@@ -39,13 +30,14 @@ class Request:
 
             is_first_line = False
 
-    def _check_request(self) -> None:
-        if self.method not in ('GET', 'POST', 'PUT', 'DELETE'):
-            raise BadRequest('Bad method in model')
-        if not self.uri.startswith('/'):
-            raise BadRequest('Bad uri in model')
-        if not self.version.startswith('HTTP/'):
-            raise BadRequest('Bad version in model')
+    def _is_correct_first_line(self, line: str) -> bool:
+        first_line = line.split(' ')
+        if len(first_line) != 3:
+            return False
+        self.method = first_line[0]
+        self.uri = first_line[1]
+        self.version = first_line[2]
+        return True
 
 
 if __name__ == '__main__':
