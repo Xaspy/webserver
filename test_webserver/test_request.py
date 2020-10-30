@@ -1,6 +1,5 @@
 import unittest
 from model.request import Request
-from ws_exceptions.ws_exceptions import BadRequest
 
 
 class TestParseRequest(unittest.TestCase):
