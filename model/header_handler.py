@@ -20,6 +20,11 @@ class HeaderHandler:
             return True
         return False
 
+    def is_can_handle_gzip(self) -> bool:
+        if self.headers['Accept-encoding'].lower().find('gzip') != -1:
+            return True
+        return False
+
     def set_content_length(self, byte: int):
         self.headers['Content-Length'] = byte
 

@@ -1,4 +1,3 @@
-import time
 import socket
 import asyncio
 from async_timeout import timeout
@@ -6,7 +5,7 @@ from model.request import Request
 from model.response import Response
 from model.routes import Route, Routes
 from ws_logging.ws_logging import Logger
-from ws_exceptions.ws_exceptions import BadRequest
+from gzip import compress
 
 
 DEFAULT_TIMEOUT = 10
@@ -24,16 +23,20 @@ class Xio:
         self.routes = Routes()
         self.loop = asyncio.get_event_loop()
         self.logger = Logger()
+        self.is_comp = False
 
-    def run(self, port=80, host='localhost', is_debug=False) -> None:
+    def run(self, port=80, host='localhost', is_debug=False, is_comp=False) -> None:
         """
         Will begin listen to host:port address
         :param port: port of server
         :param host: address of server
         :param is_debug: debug mode which can give you more information about working server
+        :param is_comp: compress mode which can compress data by gzip
         """
         if is_debug:
             self.logger.set_debug_mode()
+
+        self.is_comp = is_comp
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.bind((host, port))
@@ -82,8 +85,14 @@ class Xio:
         response = Response(request, self.routes)
         sending_data = response.bytes_response()
 
+        if self.is_comp:
+            sending_data = compress(data)
+
         await self.loop.sock_sendall(client, sending_data)
-        self.logger.server_response(addr, sending_data)
+        if self.is_comp:
+            self.logger.server_response(addr, b'compressed data')
+        else:
+            self.logger.server_response(addr, sending_data)
 
         return response.is_close_connection()
 

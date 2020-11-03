@@ -48,6 +48,9 @@ class Response:
     def is_close_connection(self) -> bool:
         return self._hh.is_close_connection()
 
+    def is_can_handle_gzip(self) -> bool:
+        return self._hh.is_can_handle_gzip()
+
 
 def _is_bad_request(req: Request) -> bool:
     if req.method == '':

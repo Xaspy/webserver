@@ -1,5 +1,4 @@
 import time
-import requests
 from urllib import request, parse
 import urllib3
 import unittest
