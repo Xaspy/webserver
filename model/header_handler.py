@@ -34,7 +34,3 @@ def _time_to_http_format(seconds) -> str:
     tuple_time = time.localtime(s)
     result = time.strftime('%a, %d %b %Y %X GMT', tuple_time)
     return result
-
-
-if __name__ == '__main__':
-    pass

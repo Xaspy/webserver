@@ -3,4 +3,9 @@ from webserver import Xio
 app = Xio(__name__)
 
 
-app.run(is_debug=True, host='10.113.232.220')
+@app.route('/kek')
+async def get_zero():
+    return "234234234dfgffffffffffffsdfffffffff"
+
+
+app.run(is_debug=True, host='localhost')

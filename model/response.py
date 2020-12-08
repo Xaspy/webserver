@@ -16,12 +16,16 @@ RESPONSE_CODES = {
 class Response:
     def __init__(self, req: Request, routes: Routes) -> None:
         self._is_bad_resp = _is_bad_request(req)
-
+        self._message_body = ""
         self._hh = HeaderHandler(req.headers)
+
+    async def get_resp(self, req: Request, routes: Routes):
         if self._is_bad_resp:
             self._message_body = 400
         else:
-            self._message_body = routes.execute_route(req.uri, req.method, req.data)
+            self._message_body = await routes.execute_route(req.uri,
+                                                            req.method,
+                                                            req.data)
 
     def bytes_response(self) -> bytes:
         if isinstance(self._message_body, int):
@@ -59,7 +63,3 @@ def _is_bad_request(req: Request) -> bool:
         return True
     if not req.version.startswith('HTTP/'):
         return True
-
-
-if __name__ == '__main__':
-    pass

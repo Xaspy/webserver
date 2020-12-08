@@ -18,8 +18,8 @@ class Logger:
     def set_debug_mode(self) -> None:
         self.logger.setLevel(logging.DEBUG)
 
-    def server_starts(self, host) -> None:
-        self.logger.info(f'Xio server started! Link: http://{host}')
+    def server_starts(self, host, port) -> None:
+        self.logger.info(f'Xio server started! Link: http://{host}:{port}')
 
     def client_connect(self, address) -> None:
         self.logger.info(f'Connected by [{address[0]}:{address[1]}]')
@@ -38,7 +38,3 @@ class Logger:
                          f' {response[9:12].decode("utf-8")}')
         self.logger.debug(f'[{address[0]}:{address[1]}]'
                           f' response body:\n{response}')
-
-
-if __name__ == '__main__':
-    pass

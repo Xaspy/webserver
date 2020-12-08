@@ -38,7 +38,3 @@ class Request:
         self.uri = first_line[1]
         self.version = first_line[2]
         return True
-
-
-if __name__ == '__main__':
-    pass

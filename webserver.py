@@ -25,12 +25,14 @@ class Xio:
         self.logger = Logger()
         self.is_comp = False
 
-    def run(self, port=80, host='localhost', is_debug=False, is_comp=False) -> None:
+    def run(self, port=80, host='localhost',
+            is_debug=False, is_comp=False) -> None:
         """
         Will begin listen to host:port address
         :param port: port of server
         :param host: address of server
-        :param is_debug: debug mode which can give you more information about working server
+        :param is_debug: debug mode which can give you more
+         information about working server
         :param is_comp: compress mode which can compress data by gzip
         """
         if is_debug:
@@ -42,7 +44,7 @@ class Xio:
             sock.bind((host, port))
             sock.listen(QUEUE_SIZE)
             sock.setblocking(IS_BLOCKING)
-            self.logger.server_starts(host)
+            self.logger.server_starts(host, port)
             self.loop.run_until_complete(self._run_async(sock))
 
     async def _run_async(self, sock) -> None:
@@ -83,6 +85,7 @@ class Xio:
         """
         request = Request(data)
         response = Response(request, self.routes)
+        await response.get_resp(request, self.routes)
         sending_data = response.bytes_response()
 
         if self.is_comp:
@@ -106,7 +109,3 @@ class Xio:
             route = Route(func, methods)
             self.routes.add_route(path, route)
         return decorator
-
-
-if __name__ == '__main__':
-    pass

@@ -1,4 +1,4 @@
-Xaspy's webserver Xio version 0.2 15/10/2020
+Xaspy's webserver Xio version 0.3 05/11/2020
 
 
 GENERAL USAGE NOTES:
@@ -28,6 +28,11 @@ Nextly runs server! You can choose one optional argument `is_debug`, `host`, `po
 server works (default: is_debug= False, host='localhost', port=80):
 
 	app.run(is_debug=True)
+
+Addly you can turn on compress mode. Choose the optional argument `is_comp` for compress responses if client
+can handle this.
+
+	app.run(is_comp=True)
 
 ----------------------------------------------------------------
 

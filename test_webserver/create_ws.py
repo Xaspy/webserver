@@ -20,7 +20,3 @@ def test_page(data):
 
 def start_server(port):
     app.run(port=port)
-
-
-if __name__ == '__main__':
-    pass
