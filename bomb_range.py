@@ -8,4 +8,4 @@ async def get_zero():
     return "234234234dfgffffffffffffsdfffffffff"
 
 
-app.run(is_debug=True, host='localhost')
+app.run(host='localhost')

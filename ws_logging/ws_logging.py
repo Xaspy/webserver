@@ -24,6 +24,9 @@ class Logger:
     def set_debug_mode(self) -> None:
         self.logger.setLevel(logging.DEBUG)
 
+    def set_info_mode(self) -> None:
+        self.logger.setLevel(logging.INFO)
+
     def server_starts(self, host, port) -> None:
         if self._current_date != _get_current_date():
             self._upload_handlers()
