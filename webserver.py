@@ -40,64 +40,87 @@ class Xio:
 
         self.is_comp = is_comp
 
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.bind((host, port))
-            sock.listen(QUEUE_SIZE)
-            sock.setblocking(IS_BLOCKING)
-            self.logger.server_starts(host, port)
-            self.loop.run_until_complete(self._run_async(sock))
+        self.loop.create_task(asyncio.start_server(self._handle_async_client, host, port))
+        self.logger.server_starts(host, port)
+        self.loop.run_forever()
 
-    async def _run_async(self, sock) -> None:
-        """
-        Start listening and handle requests
-        :param sock: socket object of server
-        """
-        while True:
-            client, addr = await self.loop.sock_accept(sock)
-            self.logger.client_connect(addr)
-            self.loop.create_task(self._handle_client(client, addr))
+        # with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        #     sock.bind((host, port))
+        #     sock.listen(QUEUE_SIZE)
+        #     sock.setblocking(IS_BLOCKING)
+        #     self.logger.server_starts(host, port)
+        #     self.loop.run_until_complete(self._run_server(sock))
 
-    async def _handle_client(self, client, addr) -> None:
-        """
-        Directly getting request and handling timeout of connect
-        :param client: client object of connected client
-        :param addr: address of connected client
-        """
-        while True:
-            try:
-                async with timeout(DEFAULT_TIMEOUT):
-                    data = await self.loop.sock_recv(client, 2 ** 20)
-                    if data != b'':
-                        if await self._handle_request(client, addr, data):
-                            break
-            except asyncio.TimeoutError:
-                break
-        client.close()
-        self.logger.client_disconnect(addr)
+    async def _handle_async_client(self, reader, writer) -> None:
+        request = await reader.read(255)
+        if request != b'':
+            response = await self._handle_async_request(request)
+            writer.write(response)
+            await writer.drain()
+            writer.close()
 
-    async def _handle_request(self, client, addr, data: bytes) -> bool:
-        """
-        Directly handling request
-        :param client: client object of connected client
-        :param addr: address of connected client
-        :param data: request data
-        :return: is close connection by client
-        """
+    async def _handle_async_request(self, data: bytes) -> bytes:
         request = Request(data)
         response = Response(request, self.routes)
         await response.get_resp(request, self.routes)
         sending_data = response.bytes_response()
 
         if self.is_comp:
-            sending_data = compress(data)
+            sending_data = compress(sending_data)
 
-        await self.loop.sock_sendall(client, sending_data)
-        if self.is_comp:
-            self.logger.server_response(addr, b'compressed data')
-        else:
-            self.logger.server_response(addr, sending_data)
+        return sending_data
 
-        return response.is_close_connection()
+    # async def _run_server(self, sock) -> None:
+    #     """
+    #     Start listening and handle requests
+    #     :param sock: socket object of server
+    #     """
+    #     while True:
+    #         client, addr = await self.loop.sock_accept(sock)
+    #         self.logger.client_connect(addr)
+    #         self.loop.create_task(self._handle_client(client, addr))
+    #
+    # async def _handle_client(self, client, addr) -> None:
+    #     """
+    #     Directly getting request and handling timeout of connect
+    #     :param client: client object of connected client
+    #     :param addr: address of connected client
+    #     """
+    #     while True:
+    #         try:
+    #             async with timeout(DEFAULT_TIMEOUT):
+    #                 data = await self.loop.sock_recv(client, 2 ** 20)
+    #                 if data != b'':
+    #                     if await self._handle_request(client, addr, data):
+    #                         break
+    #         except asyncio.TimeoutError:
+    #             break
+    #     client.close()
+    #     self.logger.client_disconnect(addr)
+    #
+    # async def _handle_request(self, client, addr, data: bytes) -> bool:
+    #     """
+    #     Directly handling request
+    #     :param client: client object of connected client
+    #     :param addr: address of connected client
+    #     :param data: request data
+    #     :return: is close connection by client
+    #     """
+    #     request = Request(data)
+    #     response = Response(request, self.routes)
+    #     await response.get_resp(request, self.routes)
+    #     sending_data = response.bytes_response()
+    #
+    #     if self.is_comp:
+    #         sending_data = compress(sending_data)
+    #
+    #     await self.loop.sock_sendall(client, sending_data)
+    #     if self.is_comp:
+    #         self.logger.server_response(addr, b'compressed data')
+    #     else:
+    #         self.logger.server_response(addr, sending_data)
+    #
+    #     return response.is_close_connection()
 
     def route(self, path: str, methods=('GET',)):
         """
