@@ -6,6 +6,8 @@ from model.response import Response
 from model.routes import Route, Routes
 from ws_logging.ws_logging import Logger
 from gzip import compress
+from ssl import create_default_context
+import ssl
 
 
 DEFAULT_TIMEOUT = 10
@@ -46,6 +48,9 @@ class Xio:
             self.logger.set_info_mode()
 
         self.is_comp = is_comp
+
+        sc = create_default_context(ssl.Purpose.CLIENT_AUTH)
+        sc.load_default_certs(ssl.Purpose.CLIENT_AUTH)
 
         self.loop.create_task(asyncio.start_server(self._handle_client, host, port))
         self.logger.server_starts(host, port)
