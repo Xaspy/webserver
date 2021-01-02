@@ -1,10 +1,10 @@
-Xaspy's webserver Xio version 0.3 05/11/2020
+Xaspy's webserver Xio version 1 02/01/2021
 
 
 GENERAL USAGE NOTES:
 --------------------
 
-This is a simple web-framework, which realised routes, but without arguing.
+This is a simple web-framework, which realised routes.
 This program can handle requests.
 
 For using web-framework you should:
@@ -21,18 +21,31 @@ Create routes to your project, firstly choose path to thing, secondly choose
 methods available for this (default: methods= ('GET', 'POST', 'DELETE', 'PUT')):
 
 	@app.route('/some-path', ['GET'])
-	def some_throw():
+	async def some_throw():
     		return 'Hello, my friend!'
 
-Nextly runs server! You can choose one optional argument `is_debug`, `host`, `port`  which provides you some info while
-server works (default: is_debug= False, host='localhost', port=80):
+You can create parametric routes:
 
-	app.run(is_debug=True)
+	@app.route('/lol/<key>')
+	async def get_second_argument(key):
+    		return key
 
-Addly you can turn on compress mode. Choose the optional argument `is_comp` for compress responses if client
-can handle this.
 
-	app.run(is_comp=True)
+Nextly runs server!:
+
+	app.run(port=80, host='localhost', is_debug=False,
+                is_comp=False, is_ssl=False, cert='selfsigned.cert',
+                key='selfsigned.key', connection_timeout=0.0001)
+
+	port - port of server
+	host - address of server
+ 	is_debug - debug mode which can give you more information about working server
+	is_comp - compress mode which can compress data by gzip
+	is_ssl - creates https server
+	cert - cert file for ssl
+	key - key file for ssl
+	connection_timeout - set timeout for connection
+
 
 ----------------------------------------------------------------
 

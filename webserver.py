@@ -1,18 +1,10 @@
-import socket
 import asyncio
-from async_timeout import timeout
 from model.request import Request
 from model.response import Response
 from model.routes import Route, Routes
 from ws_logging.ws_logging import Logger
 from gzip import compress
-from ssl import create_default_context
 import ssl
-
-
-DEFAULT_TIMEOUT = 10
-QUEUE_SIZE = 5
-IS_BLOCKING = False
 
 
 class Xio:
@@ -32,7 +24,11 @@ class Xio:
             port=80,
             host='localhost',
             is_debug=False,
-            is_comp=False
+            is_comp=False,
+            is_ssl=False,
+            cert='selfsigned.cert',
+            key='selfsigned.key',
+            connection_timeout=0.0001
             ) -> None:
         """
         Will begin listen to host:port address
@@ -41,6 +37,10 @@ class Xio:
         :param is_debug: debug mode which can give you more
          information about working server
         :param is_comp: compress mode which can compress data by gzip
+        :param is_ssl: creates https server
+        :param cert: cert file for ssl
+        :param key: key file for ssl
+        :param connection_timeout: set timeout for connection
         """
         if is_debug:
             self.logger.set_debug_mode()
@@ -48,11 +48,17 @@ class Xio:
             self.logger.set_info_mode()
 
         self.is_comp = is_comp
+        self.conn_timeout = connection_timeout
 
-        sc = create_default_context(ssl.Purpose.CLIENT_AUTH)
-        sc.load_default_certs(ssl.Purpose.CLIENT_AUTH)
-
-        self.loop.create_task(asyncio.start_server(self._handle_client, host, port))
+        if is_ssl:
+            self.logger.set_ssl_mode()
+            port = 443
+            ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            ssl_context.check_hostname = False
+            ssl_context.load_cert_chain(cert, key)
+            self.loop.create_task(asyncio.start_server(self._handle_client, host, port, ssl=ssl_context))
+        else:
+            self.loop.create_task(asyncio.start_server(self._handle_client, host, port))
         self.logger.server_starts(host, port)
         self.loop.run_forever()
 
@@ -61,7 +67,7 @@ class Xio:
         self.logger.client_connect(addr)
         while True:
             try:
-                request = await asyncio.wait_for(reader.read(1024), timeout=DEFAULT_TIMEOUT)
+                request = await asyncio.wait_for(reader.read(1024), timeout=self.conn_timeout)
                 if request != b'':
                     response, is_close_conn = await self._handle_request(request, addr)
                     writer.write(response)
@@ -97,7 +103,10 @@ class Xio:
         """
         def decorator(func):
             route = Route(func, methods)
-            self.routes.add_route(path, route)
+            if '<' in path:
+                self.routes.add_param_route(path, route)
+            else:
+                self.routes.add_route(path, route)
         return decorator
 
     """

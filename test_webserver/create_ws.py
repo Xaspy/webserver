@@ -18,5 +18,10 @@ async def test_page(data):
     return 'post ok ' + data
 
 
-def start_server(port):
-    app.run(port=port)
+@app.route('/lol/<key>')
+async def get_zero(key):
+    return key
+
+
+def start_server(port, host, is_ssl=False, cert='', key=''):
+    app.run(port=port, host=host, is_ssl=is_ssl, cert=cert, key=key)

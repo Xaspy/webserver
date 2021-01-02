@@ -18,7 +18,7 @@ class Logger:
         self._current_date = _get_current_date()
         self.logger = logging.getLogger("webserver")
         self.formatter = logging.Formatter(LOG_FORMAT)
-
+        self._protocol = 'http'
         self._upload_handlers()
 
     def set_debug_mode(self) -> None:
@@ -27,10 +27,13 @@ class Logger:
     def set_info_mode(self) -> None:
         self.logger.setLevel(logging.INFO)
 
+    def set_ssl_mode(self) -> None:
+        self._protocol = 'https'
+
     def server_starts(self, host, port) -> None:
         if self._current_date != _get_current_date():
             self._upload_handlers()
-        self.logger.info(f'Xio server started! Link: http://{host}:{port}')
+        self.logger.info(f'Xio server started! Link: {self._protocol}://{host}:{port}')
 
     def client_connect(self, address) -> None:
         if self._current_date != _get_current_date():
