@@ -3,7 +3,7 @@ import time
 
 class HeaderHandler:
     def __init__(self, request_headers: dict):
-        self.headers = {'Connection': 'keep-alive'}
+        self.headers = {'Connection': 'close'}
         if 'Connection' in request_headers.keys():
             self.headers['Connection'] = request_headers['Connection']
         self.headers['Server'] = 'xio'
